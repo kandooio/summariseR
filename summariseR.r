@@ -85,7 +85,7 @@ while (i <= NROW(df.article_condense)) {
   final.df$Position[i] <- i
   i <- i + 1
 }
-final.df$rank <- rank(-final.df$Score)
-final.df <- dplyr::arrange(final.df,rank)
-subset.df <- head(final.df, paraCount)
-print(subset.df$Content)
+final.df <- dplyr::mutate(final.df,rank = rank(Score)) %>%
+  arrange(rank) %>%
+  top_n(paraCount,rank)
+print(final.df$Content)
