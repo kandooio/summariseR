@@ -36,8 +36,7 @@ condenseR <- function(string) {
 textScorer <- function(textData) {
   library(tm)
   docs <- Corpus(VectorSource(textData))
-  toSpace <- content_transformer(function (x , pattern)
-      gsub(pattern, " ", x))
+  toSpace <- content_transformer(function (x , pattern) gsub(pattern, " ", x))
   docs <- tm_map(docs, toSpace, "/")
   docs <- tm_map(docs, toSpace, "@")
   docs <- tm_map(docs, toSpace, "\\|")
@@ -50,9 +49,7 @@ textScorer <- function(textData) {
   v <- sort(rowSums(m), decreasing = TRUE)
   df.freq <- data.frame(word = names(v), freq = v)
   df.freq$freq[df.freq$freq == 1] <- 0
-  
   return(df.freq)
-  
 }
 url <- readline(prompt = "Enter a URL: ")
 paraCount <- strtoi(readline(prompt = "How many paragraphs of content to return? "))
@@ -73,7 +70,6 @@ final.df <- as.data.frame(matrix(0, ncol = 3, nrow = NROW(df.article_condense)))
 colnames(final.df) <- c("Content", "Score", "Position")
 i <- 1
 while (i <= NROW(df.article_condense)) {
-  
   x <- strsplit(as.character(df.article_condense[i]), " ")
   x <- as.data.frame(x)
   colnames(x) <- c("word")
