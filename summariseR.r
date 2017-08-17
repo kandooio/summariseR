@@ -16,37 +16,27 @@ condenseR <- function(string) {
   string <- gsub('said', '', string)
   string <- gsub('will', '', string)
   string <- URLencode(string)
-  string <-
-    gsub('%E2%80%9C%20', '%E2%80%9C', string) # Remove trailing spaces from curly open quotes
-  string <-
-    gsub('%E2%80%9D%20', '%E2%80%9D', string) # Remove trailing spaces from curly close quotes
-  string <-
-    gsub('%E2%80%9C|%E2%80%9D', ' ', string)  # Remove curly quotes
-  string <-
-    gsub('%E2%82%AC', '', string)             # Remove euro symbol
-  string <-
-    gsub('%E2%80%99', "%27", string)          # Replace single curly quote with apostrophe
-  string <-
-    gsub('%27s', "", string)                  # remove "'s" plurals
-  string <-
-    gsub('%27t', "t", string)                 # change "n't" to "nt" i.e. "don't" to "dont"
+  string <- gsub('%E2%80%9C%20', '%E2%80%9C', string) # Remove trailing spaces from curly open quotes
+  string <- gsub('%E2%80%9D%20', '%E2%80%9D', string) # Remove trailing spaces from curly close quotes
+  string <- gsub('%E2%80%9C|%E2%80%9D', ' ', string)  # Remove curly quotes
+  string <- gsub('%E2%82%AC', '', string)             # Remove euro symbol
+  string <- gsub('%E2%80%99', "%27", string)          # Replace single curly quote with apostrophe
+  string <- gsub('%27s', "", string)                  # remove "'s" plurals
+  string <- gsub('%27t', "t", string)                 # change "n't" to "nt" i.e. "don't" to "dont"
   string <- gsub('%C3%A1', "a", string)               # Replace fada a
   string <- gsub('%C3%A9', "e", string)               # Replace fada e
   string <- gsub('%C3%AD', "i", string)               # Replace fada i
   string <- gsub('%C3%B3', "o", string)               # Replace fada o
   string <- gsub('%C3%BA', "u", string)               # Replace fada u
   string <- gsub('%E2%80%93%20', "", string)          # Replace hyphen
-  string <-
-    URLdecode(string)                       # Decode the string using URLdecode
-  string <-
-    trimws(string, which = c("both"))       # Trim whitespace
+  string <- URLdecode(string)                       # Decode the string using URLdecode
+  string <- trimws(string, which = c("both"))       # Trim whitespace
   return(string)
 }
 textScorer <- function(textData) {
   library(tm)
   docs <- Corpus(VectorSource(textData))
-  toSpace <-
-    content_transformer(function (x , pattern)
+  toSpace <- content_transformer(function (x , pattern)
       gsub(pattern, " ", x))
   docs <- tm_map(docs, toSpace, "/")
   docs <- tm_map(docs, toSpace, "@")
@@ -83,7 +73,6 @@ final.df <- as.data.frame(matrix(0, ncol = 3, nrow = NROW(df.article_condense)))
 colnames(final.df) <- c("Content", "Score", "Position")
 i <- 1
 while (i <= NROW(df.article_condense)) {
-  #Start While Loop
   
   x <- strsplit(as.character(df.article_condense[i]), " ")
   x <- as.data.frame(x)
