@@ -1,14 +1,4 @@
 # summariseR
-
-                                          _         ______ 
-                                         (_)        | ___ \
- ___ _   _ _ __ ___  _ __ ___   __ _ _ __ _ ___  ___| |_/ /
-/ __| | | | '_ ` _ \| '_ ` _ \ / _` | '__| / __|/ _ \    / 
-\__ \ |_| | | | | | | | | | | | (_| | |  | \__ \  __/ |\ \ 
-|___/\__,_|_| |_| |_|_| |_| |_|\__,_|_|  |_|___/\___\_| \_|
-                                                           
-                                                           
-
 A content summary tool using R
 
 This script takes a URL and Xpath string input from the user and returns a summary of the content found at the URL specified.
