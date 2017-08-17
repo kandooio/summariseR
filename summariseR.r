@@ -1,12 +1,4 @@
-# kandooIO summariseR
-# A content summary tool using R
-# Created by Reuben Kandiah
-# Inspired by http://smmry.com/
-
-library(RCurl)  # Allows us to open URLs
-library(tm)     # Used for text manipulation etc.
-
-# Custom Function using rvest and RCurl to return page content
+library(dplyr)
 getNode <- function(url, xPathValue) {
   library(rvest)
   library(RCurl)
@@ -15,8 +7,6 @@ getNode <- function(url, xPathValue) {
     html_text()
   return(x)
 }
-
-# Custom Function to remove punctuation and non-standard alphanumerics
 condenseR <- function(string) {
   string <- tolower(string)
   string <- gsub('\\. ', ' ', string)
@@ -52,9 +42,8 @@ condenseR <- function(string) {
     trimws(string, which = c("both"))       # Trim whitespace
   return(string)
 }
-
-# Custom Function to score each word in the content
 textScorer <- function(textData) {
+  library(tm)
   docs <- Corpus(VectorSource(textData))
   toSpace <-
     content_transformer(function (x , pattern)
@@ -75,44 +64,23 @@ textScorer <- function(textData) {
   return(df.freq)
   
 }
-
-
-# Prompt the user for the URL and the Xpath String, and the number of paragraphs to return
 url <- readline(prompt = "Enter a URL: ")
-xpath <- readline(prompt = "Enter the Xpath String: ")
-paraCount <-
-  readline(prompt = "How many paragraphs of content to return? ")
-#url <- "https://www.irishtimes.com/1.3189394"
-#xpath <- "//p[@class='no_name']"
-
-#"//div[@itemprop='articleBody']/p"
-
-# Get Article Content
+paraCount <- strtoi(readline(prompt = "How many paragraphs of content to return? "))
+xpath <- "//p"
 article.text <- getNode(url, xpath)
-# Get Article Headline
 article.headline <- getNode(url, "//h1")
-# Collapse article.text to a single vector
 article.fullText <- paste(article.text, collapse = ' ')
 txt <- condenseR(article.fullText)
-
 df.freq <- textScorer(txt)
-
-
-df.article_condense <-
-  as.list(matrix(0, ncol = 1, nrow = NROW(article.text)))
-
+df.article_condense <-  as.list(matrix(0, ncol = 1, nrow = NROW(article.text)))
 i <- 1
 while (i <= NROW(article.text)) {
   x <- condenseR(article.text[i])
   df.article_condense[i] <- x
   i <- i + 1
 }
-
-final.df <-
-  as.data.frame(matrix(0, ncol = 3, nrow = NROW(df.article_condense)))
+final.df <- as.data.frame(matrix(0, ncol = 3, nrow = NROW(df.article_condense)))
 colnames(final.df) <- c("Content", "Score", "Position")
-
-
 i <- 1
 while (i <= NROW(df.article_condense)) {
   #Start While Loop
@@ -131,12 +99,8 @@ while (i <= NROW(df.article_condense)) {
   final.df$Score[i] <- dfscore
   final.df$Position[i] <- i
   i <- i + 1
-} # End While Loop
-
+}
 final.df$rank <- rank(-final.df$Score)
-
-subset.df <-
-  head(subset(final.df[order(final.df$Position, decreasing = F), ], subset = final.df$rank <
-                NROW(df.article_condense)), paraCount)
-
+final.df <- dplyr::arrange(final.df,rank)
+subset.df <- head(final.df, paraCount)
 print(subset.df$Content)
