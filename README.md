@@ -7,8 +7,10 @@ It does this by:
 ## 1. Extracting the specified content
 Content is extracted using the "rvest" package, nested within a custom function allowing the user to pull "<p>" paragraph tags from the specified URL.
 
-## 2. Assigning a score to each word based on the frequency of usage in the content
+## 2. Assigning a score to each word
 
-## 3. Assigning a score to each paragraph based on the sum of word scores
+## 3. Assigning a score to each paragraph
 
-## 4. Returning the top N paragraphs where N is specified by the user
+## 4. Creating a dataframe of paragraphs and scores
+
+## 5. Returning the top N paragraphs
