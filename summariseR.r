@@ -1,7 +1,6 @@
 # summariseR
 # A Content summary tool by Reuben Kandiah
 
-
 # Add dplyr for data wrangling purposes!
 library(dplyr)
 
