@@ -1,4 +1,11 @@
+# summariseR
+# A Content summary tool by Reuben Kandiah
+
+
+# Add dplyr for data wrangling purposes!
 library(dplyr)
+
+# Create custom function "getNode" to extract URL content
 getNode <- function(url, xPathValue) {
   library(rvest)
   library(RCurl)
@@ -7,6 +14,8 @@ getNode <- function(url, xPathValue) {
     html_text()
   return(x)
 }
+
+# Create custom function "condenseR" to reformat content in an agreeable manner
 condenseR <- function(string) {
   string <- tolower(string)
   string <- gsub('\\. ', ' ', string)
@@ -33,6 +42,8 @@ condenseR <- function(string) {
   string <- trimws(string, which = c("both"))       # Trim whitespace
   return(string)
 }
+
+# Creawte custom function to get the word frequency in the content
 textScorer <- function(textData) {
   library(tm)
   docs <- Corpus(VectorSource(textData))
@@ -51,8 +62,12 @@ textScorer <- function(textData) {
   df.freq$freq[df.freq$freq == 1] <- 0
   return(df.freq)
 }
+                                 
+# Readline to grab user inputs
 url <- readline(prompt = "Enter a URL: ")
 paraCount <- strtoi(readline(prompt = "How many paragraphs of content to return? "))
+          
+# Define xpath value as <p> tag                                 
 xpath <- "//p"
 article.text <- getNode(url, xpath)
 article.headline <- getNode(url, "//h1")
@@ -60,14 +75,20 @@ article.fullText <- paste(article.text, collapse = ' ')
 txt <- condenseR(article.fullText)
 df.freq <- textScorer(txt)
 df.article_condense <-  as.list(matrix(0, ncol = 1, nrow = NROW(article.text)))
+                                 
+# Loop through each paragraph in the text and apply condenseR function                                 
 i <- 1
 while (i <= NROW(article.text)) {
   x <- condenseR(article.text[i])
   df.article_condense[i] <- x
   i <- i + 1
 }
+                                 
+# Create paragraph scoring dataframe                                 
 final.df <- as.data.frame(matrix(0, ncol = 3, nrow = NROW(df.article_condense)))
 colnames(final.df) <- c("Content", "Score", "Position")
+                                 
+# Loop through words in each paragraph to get paragraph score                                 
 i <- 1
 while (i <= NROW(df.article_condense)) {
   x <- strsplit(as.character(df.article_condense[i]), " ")
@@ -85,6 +106,8 @@ while (i <= NROW(df.article_condense)) {
   final.df$Position[i] <- i
   i <- i + 1
 }
+                                 
+# Rank by paragraph score and return the top "paraCount" values                                 
 final.df <- dplyr::mutate(final.df,rank = rank(Score)) %>%
   arrange(rank) %>%
   top_n(paraCount,rank)
