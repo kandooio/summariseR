@@ -108,6 +108,6 @@ while (i <= NROW(df.article_condense)) {
                                  
 # Rank by paragraph score and return the top "paraCount" values                                 
 final.df <- dplyr::mutate(final.df,rank = rank(Score)) %>%
-  arrange(rank) %>%
+  arrange(Position) %>%
   top_n(paraCount,rank)
 print(final.df$Content)
