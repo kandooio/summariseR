@@ -3,4 +3,5 @@
 
 arg1 <- 'https://www.irishtimes.com/1.3249486'
 arg2 <- 2
-source('../summariseR.r')
+summariseR_function <- dget("summariseR_source.r")
+summariseR_function(arg1,arg2)
