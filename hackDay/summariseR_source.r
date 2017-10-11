@@ -74,7 +74,7 @@ summariseR_function <- function(arg1, arg2) {
     docs <- tm_map(docs, toSpace, "@")
     docs <- tm_map(docs, toSpace, "\\|")
     docs <-
-      tm_map(docs, removeWords, c(stopwords("english")))        # Remove English stopwords
+      tm_map(docs, removeWords, c(stopwords("english")))
     docs <- tm_map(docs, removePunctuation)
     docs <- tm_map(docs, stripWhitespace)
     dtm <- TermDocumentMatrix(docs)
