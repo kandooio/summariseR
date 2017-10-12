@@ -136,8 +136,7 @@ summariseR_function <- function(arg1,arg2) {
     arrange(Position) %>%
     top_n(paraCount, rank) %>%
     top_n(paraCount * -1 ,Position)
-  
- outputContent <- paste('<p>',final.df$Content,'</p>',collapse = '')
-  
+  #print(final.df)
+  outputContent <- paste('<p>',article.text[final.df[1:paraCount,3]],'</p>',collapse='')
   print(outputContent)
 }
