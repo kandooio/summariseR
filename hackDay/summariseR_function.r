@@ -12,57 +12,33 @@ summariseR_function <- function(arg1,arg2) {
     return(x)
   }
   
-  getHTML <- function(url, xPathValue) {
-    require(rvest)
-    require(RCurl)
-    x <- read_html(url) %>%
-      html_nodes(xpath = xPathValue)
-    return(x)
-  }
-  
   # Create custom function "condenseR" to reformat content in an agreeable manner
   condenseR <- function(string) {
     string <- tolower(string)
-    string <- gsub('&nbsp', ' ', string)
     string <- gsub('\\. ', ' ', string)
+    string <- gsub('’. ', ' ', string)
     string <- gsub('[[:punct:]]|', '', string)
     string <- gsub('per cent', 'percent', string)
     string <- gsub(' - ', ' ', string)
     string <- gsub('said', '', string)
     string <- gsub('will', '', string)
     string <- URLencode(string)
-    string <-
-      gsub('%E2%80%9C%20', '%E2%80%9C', string) # Remove trailing spaces from curly open quotes
-    string <-
-      gsub('%E2%80%9D%20', '%E2%80%9D', string) # Remove trailing spaces from curly close quotes
-    string <-
-      gsub('%E2%80%9C|%E2%80%9D', ' ', string)  # Remove curly quotes
-    string <-
-      gsub('%E2%82%AC', '', string)             # Remove euro symbol
-    string <-
-      gsub('%E2%80%99', "%27", string)          # Replace single curly quote with apostrophe
-    string <-
-      gsub('%27s', "", string)                  # remove "'s" plurals
-    string <-
-      gsub('%E2', "", string)                  # remove accent a
-    string <-
-      gsub('%27t', "t", string)                 # change "n't" to "nt" i.e. "don't" to "dont"
-    string <-
-      gsub('%C3%A1', "a", string)               # Replace fada a
-    string <-
-      gsub('%C3%A9', "e", string)               # Replace fada e
-    string <-
-      gsub('%C3%AD', "i", string)               # Replace fada i
-    string <-
-      gsub('%C3%B3', "o", string)               # Replace fada o
-    string <-
-      gsub('%C3%BA', "u", string)               # Replace fada u
-    string <-
-      gsub('%E2%80%93%20', "", string)          # Replace hyphen
-    string <-
-      URLdecode(string)                       # Decode the string using URLdecode
-    string <-
-      trimws(string, which = c("both"))       # Trim whitespace
+    string <- gsub('%E2%80%9C%20', '%E2%80%9C', string) # Remove trailing spaces from curly open quotes
+    string <- gsub('%E2%80%9D%20', '%E2%80%9D', string) # Remove trailing spaces from curly close quotes
+    string <- gsub('%E2%80%9C|%E2%80%9D', ' ', string)  # Remove curly quotes
+    string <- gsub('%E2%82%AC', '', string)             # Remove euro symbol
+    string <- gsub('%E2%80%99', "%27", string)          # Replace single curly quote with apostrophe
+    string <- gsub('%27s', "", string)                  # remove "'s" plurals
+    string <- gsub('%27t', "t", string)                 # change "n't" to "nt" i.e. "don't" to "dont"
+    string <- gsub('%C2', "", string)                   # Replace a-hat
+    string <- gsub('%C3%A1', "a", string)               # Replace fada a
+    string <- gsub('%C3%A9', "e", string)               # Replace fada e
+    string <- gsub('%C3%AD', "i", string)               # Replace fada i
+    string <- gsub('%C3%B3', "o", string)               # Replace fada o
+    string <- gsub('%C3%BA', "u", string)               # Replace fada u
+    string <- gsub('%E2%80%93%20', "", string)          # Replace hyphen
+    string <- URLdecode(string)                         # Decode the string using URLdecode
+    string <- trimws(string, which = c("both"))         # Trim whitespace
     return(string)
   }
   
@@ -136,7 +112,6 @@ summariseR_function <- function(arg1,arg2) {
     arrange(Position) %>%
     top_n(paraCount, rank) %>%
     top_n(paraCount * -1 ,Position)
-  #print(final.df)
   outputContent <- paste('<p>',article.text[final.df[1:paraCount,3]],'</p>',collapse='')
   print(outputContent)
 }
