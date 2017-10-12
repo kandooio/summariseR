@@ -13,7 +13,6 @@ getNodeURL <- function(url, xPathValue) {
   return(x)
 }
 
-
 # Create custom function "condenseR" to reformat content in an agreeable manner
 condenseR <- function(string) {
   string <- tolower(string)                         
@@ -70,7 +69,7 @@ url <- arg1
 paraCount <- arg2
 
 # Use nodeGet to extract search tags from article
-article.tags <- getNode(url, '//a[@class="search"]')
+article.tags <- getNode(url, '//a')
 
 # Error handling for zero search tags on-page
 if (length(article.tags) > 0) {
