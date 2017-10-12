@@ -137,5 +137,7 @@ summariseR_function <- function(arg1,arg2) {
     top_n(paraCount, rank) %>%
     top_n(paraCount * -1 ,Position)
   
-  print(final.df)
+ outputContent <- paste('<p>',final.df$Content,'</p>',collapse = '')
+  
+  print(outputContent)
 }
