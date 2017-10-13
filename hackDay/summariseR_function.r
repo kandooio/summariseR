@@ -13,57 +13,52 @@ getNodeURL <- function(url, xPathValue) {
   return(x)
 }
 
-# Create custom function "condenseR" to reformat content in an agreeable manner
-condenseR <- function(string) {
-  string <- tolower(string)                         
-  string <- gsub('\\. ', ' ', string)            
-  string <- gsub('\\\’\\. ', ' ', string)      
-  string <- gsub('[[:punct:]]|', '', string)                         
-  string <- gsub('per cent|rate', '', string)         # Remove statistical observations
-  string <- gsub(' - ', ' ', string)                         
-  string <- gsub('said|will', '', string)             # Remove additional stopwords
-  string <- URLencode(string)                         # URL Encode the string
-  string <- gsub('%E2%80%9C%20', '%E2%80%9C', string) # Remove trailing spaces from curly open quotes
-  string <- gsub('%E2%80%9D%20', '%E2%80%9D', string) # Remove trailing spaces from curly close quotes
-  string <- gsub('%E2%80%9C|%E2%80%9D', ' ', string)  # Remove curly quotes
-  string <- gsub('%E2%82%AC', '', string)             # Remove euro symbol
-  string <- gsub('%E2%80%99', "%27", string)          # Replace single curly quote with apostrophe
-  string <- gsub('%27s', "", string)                  # remove "'s" plurals
-  string <- gsub('%27t', "t", string)                 # change "n't" to "nt" i.e. "don't" to "dont"
-  string <- gsub('%C2', "", string)                   # Replace a-hat
-  string <- gsub('%C3%A1', "a", string)               # Replace fada a
-  string <- gsub('%C3%A9', "e", string)               # Replace fada e
-  string <- gsub('%C3%AD', "i", string)               # Replace fada i
-  string <- gsub('%C3%B3', "o", string)               # Replace fada o
-  string <- gsub('%C3%BA', "u", string)               # Replace fada u
-  string <- gsub('%E2%80%93%20', "", string)          # Replace hyphen
-  string <- URLdecode(string)                         # Decode the string using URLdecode
-  string <- trimws(string, which = c("both"))         # Trim whitespace
-  return(string)
-}
-
-# Create custom function to get the word frequency in the content
-textScorer <- function(textData) {
-  require(tm)
-  docs <- Corpus(VectorSource(textData))
-  toSpace <-
-    content_transformer(function (x , pattern)
-      gsub(pattern, " ", x))
-  docs <- tm_map(docs, toSpace, "/")
-  docs <- tm_map(docs, toSpace, "@")
-  docs <- tm_map(docs, toSpace, "\\|")
-  docs <-
-    tm_map(docs, removeWords, c(stopwords("english")))        # Remove English stopwords
-  docs <- tm_map(docs, removePunctuation)
-  docs <- tm_map(docs, stripWhitespace)
-  dtm <- TermDocumentMatrix(docs)
-  m <- as.matrix(dtm)
-  v <- sort(rowSums(m), decreasing = TRUE)
-  df.freq <- data.frame(word = names(v), freq = v)
-  df.freq$freq[df.freq$freq == 1] <- 0
-  return(df.freq)
-}
-
+  # Create custom function "condenseR" to reformat content in an agreeable manner
+  condenseR <- function(string) {
+    string <- tolower(string)
+    string <- gsub('\\. ', ' ', string)
+    string <- gsub('\\\’\\. ', ' ', string)
+    string <- gsub('[[:punct:]]|', '', string)
+    string <- gsub('per cent|rate', '', string)   # Remove statistical observations
+    string <- gsub(' - ', ' ', string)
+    string <- URLencode(string) # URL Encode the string
+    string <- gsub('%E2%80%9C%20', '%E2%80%9C', string) # Remove trailing spaces from curly open quotes
+    string <- gsub('%E2%80%9D%20', '%E2%80%9D', string) # Remove trailing spaces from curly close quotes
+    string <- gsub('%E2%80%9C|%E2%80%9D', ' ', string)  # Remove curly quotes
+    string <- gsub('%E2%82%AC', '', string) # Remove euro symbol
+    string <- gsub('%E2%80%99', "%27", string)    # Replace single curly quote with apostrophe
+    string <- gsub('%27s', "", string)# remove "'s" plurals
+    string <- gsub('%27t', "t", string)     # change "n't" to "nt" i.e. "don't" to "dont"
+    string <- gsub('%C2', "", string) # Replace a-hat
+    string <- gsub('%C3%A1', "a", string)   # Replace fada a
+    string <- gsub('%C3%A9', "e", string)   # Replace fada e
+    string <- gsub('%C3%AD', "i", string)   # Replace fada i
+    string <- gsub('%C3%B3', "o", string)   # Replace fada o
+    string <- gsub('%C3%BA', "u", string)   # Replace fada u
+    string <- gsub('%E2%80%93%20', "", string)    # Replace hyphen
+    string <- URLdecode(string) # Decode the string using URLdecode
+    string <- trimws(string, which = c("both"))   # Trim whitespace
+    return(string)
+  }
+  
+  # Create custom function to get the word frequency in the content
+  textScorer <- function(textData) {
+    require(tm)
+    docs <- Corpus(VectorSource(textData))
+    toSpace <- content_transformer(function (x , pattern) gsub(pattern, " ", x))
+    docs <- tm_map(docs, toSpace, "/")
+    docs <- tm_map(docs, toSpace, "@")
+    docs <- tm_map(docs, toSpace, "\\|")
+    docs <- tm_map(docs, removeWords, c(stopwords("SMART")))        # Remove SMART stopwords
+    docs <- tm_map(docs, removePunctuation)
+    docs <- tm_map(docs, stripWhitespace)
+    dtm <- TermDocumentMatrix(docs)
+    m <- as.matrix(dtm)
+    v <- sort(rowSums(m), decreasing = TRUE)
+    df.freq <- data.frame(word = names(v), freq = v)
+    df.freq$freq[df.freq$freq == 1] <- 0
+    return(df.freq)
+  }
 # Readline to grab user inputs
 url <- arg1
 paraCount <- arg2
