@@ -1,18 +1,16 @@
-summariseR_function <- function(arg1,arg2){
+summariseR_function <- function(arg1, arg2) {
+  require(dplyr)
   
-# Add dplyr for data wrangling purposes!
-require(dplyr)
-
-# Create custom function "getNode" to extract URL content
-getNodeURL <- function(url, xPathValue) {
-  require(rvest)
-  require(RCurl)
-  x <- read_html(url) %>%
-    html_nodes(xpath = xPathValue) %>%
-    html_text()
-  return(x)
-}
-
+  # Create custom function "getNode" to extract URL content
+  getNode <- function(url, xPathValue) {
+    require(rvest)
+    require(RCurl)
+    x <- read_html(url) %>%
+      html_nodes(xpath = xPathValue) %>%
+      html_text()
+    return(x)
+  }
+  
   # Create custom function "condenseR" to reformat content in an agreeable manner
   condenseR <- function(string) {
     string <- tolower(string)
@@ -49,7 +47,8 @@ getNodeURL <- function(url, xPathValue) {
     docs <- tm_map(docs, toSpace, "/")
     docs <- tm_map(docs, toSpace, "@")
     docs <- tm_map(docs, toSpace, "\\|")
-    docs <- tm_map(docs, removeWords, c(stopwords("SMART")))        # Remove SMART stopwords
+    docs <- tm_map(docs, removeWords, c(stopwords("SMART")))        # Remove English stopwords
+    docs <- tm_map(docs, removeWords, c("dont")) # Remove specific words
     docs <- tm_map(docs, removePunctuation)
     docs <- tm_map(docs, stripWhitespace)
     dtm <- TermDocumentMatrix(docs)
@@ -59,71 +58,75 @@ getNodeURL <- function(url, xPathValue) {
     df.freq$freq[df.freq$freq == 1] <- 0
     return(df.freq)
   }
-# Readline to grab user inputs
-url <- arg1
-paraCount <- arg2
-
-# Use nodeGet to extract search tags from article
-article.tags <- getNode(url, '//a')
-
-# Error handling for zero search tags on-page
-if (length(article.tags) > 0) {
-  tag.list <- paste(tolower(article.tags), collapse = '|')
-  tag.list <- gsub(' ', '\\|', tag.list)
-  tag.list <- strsplit(x = tag.list, split = '\\|')
-  tags.df <-
-    as.data.frame(matrix(0, ncol = 2, nrow = lengths(tag.list)))
-  tags.df[, 1] <- tag.list
-  tags.df[, 2] <- 2
-  colnames(tags.df) <- c('tag', 'multiplier')
-  tags.df$tag <- gsub('\\.', '', tags.df$tag)
-  tags.df <- dplyr::filter(tags.df,!grepl('irishtimes', tag))
-} else{
-  tags.df <-
-    as.data.frame(matrix(0, ncol = 2, nrow = 1))
-  colnames(tags.df) <- c('tag', 'multiplier')
-}
-
-xpath <- '//p[@class="no_name"]'                              # Define xpath value as <p> tag
-article.text <- getNode(url, xpath)                           # Get Article Text
-article.fullText <- paste(article.text, collapse = ' ')       # Collapse article.text to get full content
-txt <- condenseR(article.fullText)                            # Text wrangling on full article
-df.freq <- textScorer(txt)                                    # Text scoring on full article
-
-df.article_condense <- as.list(matrix(0, ncol = 1, nrow = NROW(article.text))) # Empy Dataframe for paragraph condensing
-# Loop through each paragraph in the text and apply condenseR function
-i <- 1
-while (i <= NROW(article.text)) {
-  x <- condenseR(article.text[i])
-  df.article_condense[i] <- x
-  i <- i + 1
-}
-
-# Create paragraph scoring dataframe
-final.df <- as.data.frame(matrix(0, ncol = 3, nrow = NROW(df.article_condense)))
-colnames(final.df) <- c("Content", "Score", "Position")
-
-# Loop through words in each paragraph to get paragraph score
-i <- 1
-while (i <= NROW(df.article_condense)) {
-  x <- strsplit(as.character(df.article_condense[i]), " ")
-  x <- as.data.frame(x)
-  colnames(x) <- c("word")
-  df1 <- x
-  dfscore <- merge(x = df1,
-                   y = df.freq,
-                   by = "word",
-                   all.x = TRUE)
-  dfscore <- sum(dfscore$freq, NA, na.rm = TRUE)
+                                   
+  # Readline to grab user inputs
+  url <- arg1
+  paraCount <- arg2
+  article.headline <- getNode(url, '//h1')
+                                   
+  # Use nodeGet to extract search tags from article
+  article.tags <- getNode(url, '//a')
+                                   
+  # Tag Dataframe Creation (from href tags in HTML)
+  if (length(article.tags) > 0) {
+    tag.list <- paste(tolower(article.tags), collapse = '|')
+    tag.list <- gsub(' ', '\\|', tag.list)
+    tag.list <- strsplit(x = tag.list, split = '\\|')
+    tags.df <- as.data.frame(matrix(0, ncol = 2, nrow = lengths(tag.list)))
+    tags.df[, 1] <- tag.list
+    tags.df[, 2] <- 2
+    colnames(tags.df) <- c('tag', 'multiplier')
+    tags.df$tag <- gsub('\\.', '', tags.df$tag)
+    tags.df <- dplyr::filter(tags.df, !grepl('irishtimes', tag))
+  } else{
+    tags.df <- as.data.frame(matrix(0, ncol = 2, nrow = 1))
+    colnames(tags.df) <- c('tag', 'multiplier')
+  }
+                                   
+  xpath <- '//p'                                                # Define xpath value as <p> tag
+  article.text <- getNode(url, xpath)                           # Get Article Text
+  article.fullText <- paste(article.text, collapse = ' ')       # Collapse article.text to get full content
+  txt <- condenseR(article.fullText)                            # Text wrangling on full article
+  df.freq <- textScorer(txt)                                    # Text scoring on full article
+  df.article_condense <- as.list(matrix(0, ncol = 1, nrow = NROW(article.text))) # Empy Dataframe for paragraph condensing
   
-  final.df$Content[i] <- article.text[i]
-  final.df$Score[i] <- dfscore
-  final.df$Position[i] <- i
-  i <- i + 1
-}
+  # Loop through each paragraph in the text and apply condenseR function
+  i <- 1
+  while (i <= NROW(article.text)) {
+    x <- condenseR(article.text[i])
+    df.article_condense[i] <- x
+    i <- i + 1
+  }
 
-# Rank by paragraph score and return the top "paraCount" values
-final.df <- dplyr::mutate(final.df, rank = rank(Score)) %>% arrange(Position) %>% top_n(paraCount, rank)
-outputContent <- paste('<p>',article.text[final.df[1:paraCount,3]],'</p>',collapse='')
-print(outputContent)
+  # Create paragraph scoring dataframe
+  final.df <- as.data.frame(matrix(0, ncol = 3, nrow = NROW(df.article_condense)))
+  colnames(final.df) <- c("Content", "Score", "Position")
+
+  # Loop through words in each paragraph to get paragraph score
+  i <- 1
+  while (i <= NROW(df.article_condense)) {
+    x <- strsplit(as.character(df.article_condense[i]), " ")
+    x <- as.data.frame(x)
+    colnames(x) <- c("word")
+    df1 <- x
+    dfscore <- merge(
+      x = df1,
+      y = df.freq,
+      by = "word",
+      all.x = TRUE
+    )
+    dfscore <- sum(dfscore$freq, NA, na.rm = TRUE)
+    
+    final.df$Content[i] <- article.text[i]
+    final.df$Score[i] <- dfscore
+    final.df$Position[i] <- i
+    i <- i + 1
+  }
+  
+  # Rank by paragraph score and return the top "paraCount" values
+  final.df <- dplyr::mutate(final.df, rank = rank(Score)) %>% arrange(Position) %>% top_n(paraCount, rank)
+  articleContent <- gsub(' </p>', '</p>', (gsub('<p> ','<p>',paste('<p>', article.text[final.df[1:paraCount, 3]], '</p>', collapse = ''))))
+  outputContent <- paste(articleContent, sep = '')
+
+  return(outputContent)
 }
