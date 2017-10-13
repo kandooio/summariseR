@@ -19,7 +19,7 @@ condenseR <- function(string) {
   string <- gsub('\\. ', ' ', string)            
   string <- gsub('\\\’\\. ', ' ', string)      
   string <- gsub('[[:punct:]]|', '', string)                         
-  string <- gsub('per cent', 'percent', string)                         
+  string <- gsub('per cent|rate', '', string)         # Remove statistical observations
   string <- gsub(' - ', ' ', string)                         
   string <- gsub('said|will', '', string)             # Remove additional stopwords
   string <- URLencode(string)                         # URL Encode the string
